@@ -4,16 +4,39 @@ const app = exp();
 
 const PORT = 7777;
 
-app.use("/hello", (req, res) => {
-  res.send("Hello hello hello ...");
+const person_data = {
+  name: "Manoj",
+  age: 26,
+  city: "Mysore"
+};
+
+app.get("/user/:id", (req, res) => {
+  const {id} = req.params
+  console.log("user id : ",id)
+  res.send(person_data);
 });
 
-app.use("/test", (req, res) => {
-  res.send("I am testing");
+app.get("/search", (req, res) => {
+  const {a,type} = req.query
+  console.log("a value :",a)
+  console.log("type value :",type)
+  res.send(a);
+})
+
+app.post("/user", (req, res) => {
+  res.send("POST request to the /user endpoint received.");
 });
 
-app.use((req, res) => {
-  res.send("Message from server .... Manoj");
+app.put("/user", (req, res) => {
+  res.send("PUT request to the /user endpoint received.");
+});
+
+app.delete("/user", (req, res) => {
+  res.send("DELETE request to the /user endpoint received.");
+});
+
+app.patch("/test", (req, res) => {
+  res.send("PATCH request to the /user endpoint received.");
 });
 
 app.listen(PORT, () => {
