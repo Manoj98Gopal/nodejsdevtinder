@@ -1,6 +1,7 @@
 const exp = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const validator = require("validator");
 
 const app = exp();
 
@@ -18,8 +19,6 @@ app.post("/signup", async (req, res) => {
     res.status(500).send(error?.message);
   }
 });
-
-
 
 app.get("/getUsers", async (req, res) => {
   try {
@@ -54,10 +53,23 @@ app.delete("/deleteUser/:id", async (req, res) => {
   }
 });
 
-app.patch("/updateUser", async (req, res) => {
+app.patch("/updateUser/:id", async (req, res) => {
   try {
     const tempData = req.body;
-    const result = await User.findByIdAndUpdate(tempData?.id, tempData,{returnDocument:"after"});
+    const { id } = req.params;
+
+    const ALLOWED_UPDATE = ["lastName", "password", "age", "profileUrl"];
+    const isUpdateAllowed = Object.keys(ALLOWED_UPDATE)?.every((k) =>
+      ALLOWED_UPDATE.includes(k)
+    );
+
+    if (!isUpdateAllowed) {
+      res.status(400).send("Now allowed to update")
+    }
+
+    const result = await User.findByIdAndUpdate(id, tempData, {
+      returnDocument: "after"
+    });
     res.send(result);
   } catch (error) {
     console.error("unable to fetch users", error);
