@@ -15,9 +15,11 @@ app.post("/signup", async (req, res) => {
     res.send("User signed up successfully");
   } catch (error) {
     console.error("Error signing up user:", error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).send(error?.message);
   }
 });
+
+
 
 app.get("/getUsers", async (req, res) => {
   try {
