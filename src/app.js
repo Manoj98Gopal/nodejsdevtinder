@@ -63,7 +63,7 @@ app.patch("/updateUser/:id", async (req, res) => {
       ALLOWED_UPDATE.includes(k)
     );
 
-    if (!isUpdateAllowed) {
+    if (!isUpdateAllowed) {``
       res.status(400).send("Now allowed to update")
     }
 
