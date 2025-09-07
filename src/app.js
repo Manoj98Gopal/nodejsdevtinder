@@ -3,12 +3,16 @@ const connectDB = require("./config/database");
 const User = require("./models/user");
 const UserValidator = require("./utils/validation");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const userMiddleware = require("./middlewares/userMiddleware");
 
 const app = exp();
 
 const PORT = 7777;
 
 app.use(exp.json());
+app.use(cookieParser());
 
 app.post("/signup", async (req, res) => {
   UserValidator(req);
@@ -37,72 +41,28 @@ app.post("/signin", async (req, res) => {
       throw new Error("Invalid credentials!");
     }
 
-    const isValidUser = await bcrypt.compareSync(password, userData.password);
+    const isValidUser = await userData.verifyPassword(password);
 
     if (!isValidUser) {
       throw new Error("Invalid credentials!");
     }
+
+    const jwtToken = await userData.getJwt();
+
+    res.cookie("token", jwtToken);
     res.send("Successfully login !");
   } catch (error) {
     res.status(500).send(error.message);
   }
 });
 
-app.get("/getUsers", async (req, res) => {
+app.get("/profile", userMiddleware, async (req, res) => {
   try {
-    const results = await User.find({});
-    res.send(results);
+    const userData = req.user;
+    res.send(userData);
   } catch (error) {
-    console.error("unable to fetch users", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-app.get("/getUsers/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const results = await User.findById(id);
-    res.send(results);
-  } catch (error) {
-    console.error("unable to fetch users", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-app.delete("/deleteUser/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    console.log("id :", id);
-    await User.findByIdAndDelete(id);
-    res.send("Successfully deleted..!");
-  } catch (error) {
-    console.error("unable to fetch users", error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
-app.patch("/updateUser/:id", async (req, res) => {
-  try {
-    const tempData = req.body;
-    const { id } = req.params;
-
-    const ALLOWED_UPDATE = ["lastName", "password", "age", "profileUrl"];
-    const isUpdateAllowed = Object.keys(ALLOWED_UPDATE)?.every((k) =>
-      ALLOWED_UPDATE.includes(k)
-    );
-
-    if (!isUpdateAllowed) {
-      ``;
-      res.status(400).send("Now allowed to update");
-    }
-
-    const result = await User.findByIdAndUpdate(id, tempData, {
-      returnDocument: "after"
-    });
-    res.send(result);
-  } catch (error) {
-    console.error("unable to fetch users", error);
-    res.status(500).send("Internal Server Error");
+    console.error("profile error :", error);
+    res.status(500).send(error.message);
   }
 });
 

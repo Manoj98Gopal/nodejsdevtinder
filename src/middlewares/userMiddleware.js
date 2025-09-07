@@ -1,13 +1,23 @@
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 
-const userMiddleware = (req, res, next) => {
-  console.log("user middleware");
-  const token = "xydz";
-  if (token === "xyz") {
+const userMiddleware = async (req, res, next) => {
+  try {
+    const { token } = req.cookies;
+
+    if (!token) {
+      throw new Error("Please login!");
+    }
+
+    const decoded = jwt.verify(token, "Learning node js");
+    const userData = await User.findById({ _id: decoded?._id });
+
+    req.user = userData;
+
     next();
-  } else {
-    res.status(401).send("Unauthorized Access");
+  } catch (error) {
+    throw new Error(error.message);
   }
 };
 
-
-module.exports = userMiddleware
+module.exports = userMiddleware;
