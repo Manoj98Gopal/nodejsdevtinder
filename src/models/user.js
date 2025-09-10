@@ -1,85 +1,73 @@
 const mongoose = require("mongoose");
-const v = require("validator");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+const validator = require("validator");
 
-const userSchema = new mongoose.Schema(
+const { Schema, model } = mongoose;
+
+const userSchema = new Schema(
   {
     firstName: {
       type: String,
-      minlength: [
-        4,
-        "First name must be at least 4 characters long, got '{VALUE}'"
-      ]
+      required: true,
+      trim: true,
     },
     lastName: {
-      type: String
+      type: String,
+      required: true,
+      trim: true,
     },
-    emailId: {
+    email: {
       type: String,
       required: true,
       unique: true,
-      trim: true,
       lowercase: true,
+      trim: true,
       validate: {
-        validator: (value) => v.isEmail(value),
-        message: (props) => `${props.value} is not a valid email`
-      }
+        validator: (value) => validator.isEmail(value),
+        message: (props) => `${props.value} is not a valid email`,
+      },
     },
-    password: {
-      type: String
-    },
-    age: {
-      type: Number,
-      min: [18, "Age should be above 18, got '{VALUE}'"]
+    phoneNumber: {
+      type: String,
+      trim: true,
+      validate: {
+        validator: (value) =>
+          !value || validator.isMobilePhone(value, "any", { strictMode: false }),
+        message: (props) => `${props.value} is not a valid phone number`,
+      },
     },
     gender: {
       type: String,
-      validate: {
-        validator: (value) => {
-          const validation = ["Male", "Female"];
-          return validation.includes(value);
-        },
-        message: (props) => `'${props.value}' is not allowed`
-      }
+      enum: ["male", "female", "other"], // restrict values
     },
-    profileUrl: {
+    profileURL: {
       type: String,
-      default: "https://www.freepik.com/icon/user-profile_5951752",
+      default: "https://cdn-icons-png.flaticon.com/512/149/149071.png", // valid placeholder
+      trim: true,
       validate: {
-        validator: (value) => {
-          return /^(https?:\/\/[^\s$.?#].[^\s]*)$/i.test(value);
-        },
-        message: (props) => `${props.value} is not a valid URL`
-      }
-    }
+        validator: (value) => validator.isURL(value),
+        message: (props) => `${props.value} is not a valid URL`,
+      },
+    },
+    about: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+    },
+    skills: {
+      type: [String], // correct syntax
+      default: [],
+      validate: {
+        validator: (skills) => skills.length <= 10,
+        message: () => `Skills must be less than or equal to 10`,
+      },
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: [5, "Password must be at least 5 characters long"],
+    },
   },
-  { timestamps: true }
+  { timestamps: true } // auto createdAt & updatedAt
 );
 
-userSchema.methods.getJwt = async function () {
-  try {
-    user = this;
-    const token = await jwt.sign({ _id: user._id }, "Learning node js", {
-      expiresIn: "2m"
-    });
-    return token;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-userSchema.methods.verifyPassword = async function (userInputPassword) {
-  try {
-    user = this;
-    const isValidUser = await bcrypt.compareSync(
-      userInputPassword,
-      user.password
-    );
-    return isValidUser;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-module.exports = mongoose.model("User", userSchema);
+module.exports = model("User", userSchema);
