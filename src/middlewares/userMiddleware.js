@@ -6,11 +6,11 @@ const userMiddleware = async (req, res, next) => {
     const { token } = req.cookies;
 
     if (!token) {
-      throw new Error("Please login!");
+      return res.status(400).json({ success: false, message: "Please login" });
     }
 
-    const decoded = jwt.verify(token, "Learning node js");
-    const userData = await User.findById({ _id: decoded?._id });
+    const decoded = jwt.verify(token, "devTinder");
+    const userData = await User.findById({ _id: decoded?.id });
 
     req.user = userData;
 

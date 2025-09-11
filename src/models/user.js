@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcrypt");
 
 const { Schema, model } = mongoose;
 
@@ -71,5 +72,14 @@ const userSchema = new Schema(
   },
   { timestamps: true } // auto createdAt & updatedAt
 );
+
+userSchema.methods.comparePassword = async function (userInputPassword) {
+  const user = this;
+  const isValidPassword = await bcrypt.compare(
+    userInputPassword,
+    user.password
+  );
+  return isValidPassword;
+};
 
 module.exports = model("User", userSchema);
