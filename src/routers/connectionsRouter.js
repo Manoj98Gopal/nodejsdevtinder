@@ -35,7 +35,7 @@ ConnectionRouter.post(
           .json({ message: "Cannot send request to yourself" });
       }
 
-      const existingRequest = await connectionRequest
+      const existingRequest = await ConnectionRequest
         .findOne({
           $or: [
             { sender: senderId, receiver: receiverId },
@@ -50,7 +50,7 @@ ConnectionRouter.post(
           .json({ message: "Connection request already exists" });
       }
 
-      const newRequest = new connectionRequest({
+      const newRequest = new ConnectionRequest({
         sender: senderId,
         receiver: receiverId,
         status

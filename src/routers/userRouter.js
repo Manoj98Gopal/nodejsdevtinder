@@ -1,6 +1,7 @@
 const express = require("express");
 const userMiddleware = require("../middlewares/userMiddleware");
 const ConnectionRequest = require("../models/connectionRequest");
+const User = require("../models/user");
 
 const UserRouter = express.Router();
 
@@ -40,6 +41,35 @@ UserRouter.get("/user/connections", userMiddleware, async (req, res) => {
     });
 
     res.status(200).json({ message: "Success fully fetched", data });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+UserRouter.get("/user/feed", userMiddleware, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+
+    const myConnections = await ConnectionRequest.find({
+      $or: [{ sender: loggedInUser._id }, { receiver: loggedInUser._id }]
+    });
+
+    const uniqueUserIds = new Set();
+
+    myConnections.forEach((data) => {
+      uniqueUserIds.add(data.sender);
+      uniqueUserIds.add(data.receiver);
+    });
+
+    uniqueUserIds.add(loggedInUser._id);
+
+    const hiddenUsers = Array.from(uniqueUserIds);
+
+    const feed = await User.find({
+      _id: { $nin: hiddenUsers }
+    }).select("_id firstName lastName email gender profileURL skills");
+
+    res.status(200).json({ message: "successful fetched!", data: feed });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
