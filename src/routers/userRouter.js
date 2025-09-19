@@ -50,6 +50,11 @@ UserRouter.get("/user/feed", userMiddleware, async (req, res) => {
   try {
     const loggedInUser = req.user;
 
+    const pageNumber = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 0
+    const skipNum = (pageNumber - 1) * limit 
+
+
     const myConnections = await ConnectionRequest.find({
       $or: [{ sender: loggedInUser._id }, { receiver: loggedInUser._id }]
     });
@@ -67,7 +72,7 @@ UserRouter.get("/user/feed", userMiddleware, async (req, res) => {
 
     const feed = await User.find({
       _id: { $nin: hiddenUsers }
-    }).select("_id firstName lastName email gender profileURL skills");
+    }).select("_id firstName lastName email gender profileURL skills").skip(skipNum).limit(limit)
 
     res.status(200).json({ message: "successful fetched!", data: feed });
   } catch (error) {
