@@ -16,6 +16,10 @@ const userSchema = new Schema(
       required: [true, "Last name is required"],
       trim: true
     },
+    experience: {
+      type: String,
+      trim: true
+    },
     email: {
       type: String,
       required: [true, "Email is required"],
