@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Connections from "./pages/Connections";
 import Requests from "./pages/Requests";
+import { Toaster } from "./components/ui/sonner";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/requests" element={<Requests />} />
         </Route>
       </Routes>
+      <Toaster richColors />
     </BrowserRouter>
   );
 }

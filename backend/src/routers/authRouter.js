@@ -63,7 +63,7 @@ AuthRouter.post("/signin", async (req, res) => {
       httpOnly: false
     });
 
-    res.status(200).json({ success: true, data: "successfully login" });
+    res.status(200).json({ success: true, data: user });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }

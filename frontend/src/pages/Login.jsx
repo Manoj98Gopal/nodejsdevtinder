@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Code } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "@/utils/http";
+import { toast } from "sonner";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -40,10 +42,12 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const success = await login(loginForm.email, loginForm.password);
-      if (success) {
+      const response = await api.post("/signin", loginForm);
+
+      if (response.data.success) {
         toast.success("Welcome back!");
-        navigate("/feed");
+        console.log("user data :", response.data.data);
+        navigate("/");
       } else {
         toast.error("Invalid credentials");
       }

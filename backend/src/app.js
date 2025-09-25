@@ -5,10 +5,19 @@ const AuthRouter = require("./routers/authRouter");
 const ProfileRouter = require("./routers/profileRouter");
 const ConnectionRouter = require("./routers/connectionsRouter");
 const UserRouter = require("./routers/userRouter");
+const cors = require("cors");
 
 const app = exp();
 const PORT = 7777;
 
+const ALLOW_ORIGINS = ["http://localhost:5173"];
+
+app.use(
+  cors({
+    origin: ALLOW_ORIGINS,
+    credentials: true
+  })
+);
 app.use(exp.json());
 app.use(cookieParser());
 
