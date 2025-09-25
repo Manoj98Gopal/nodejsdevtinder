@@ -6,19 +6,23 @@ import Profile from "./pages/Profile";
 import Connections from "./pages/Connections";
 import Requests from "./pages/Requests";
 import { Toaster } from "./components/ui/sonner";
+import { Provider } from "react-redux";
+import { store } from "./app/store";
 
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Body />}>
-          <Route index element={<Feed />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/connections" element={<Connections />} />
-          <Route path="/requests" element={<Requests />} />
-        </Route>
-      </Routes>
+      <Provider store={store}>
+        <Routes>
+          <Route path="/" element={<Body />}>
+            <Route index element={<Feed />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/connections" element={<Connections />} />
+            <Route path="/requests" element={<Requests />} />
+          </Route>
+        </Routes>
+      </Provider>
       <Toaster richColors />
     </BrowserRouter>
   );

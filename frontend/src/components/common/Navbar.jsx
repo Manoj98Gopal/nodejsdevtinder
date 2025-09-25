@@ -3,14 +3,14 @@ import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import ThemeToggle from "./ThemeToggle";
+import api from "@/utils/http";
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // logout();
-    // toast.success("Logged out successfully");
+  const handleLogout = async () => {
+    await api.post("/logout",{});
     navigate("/login");
   };
 
