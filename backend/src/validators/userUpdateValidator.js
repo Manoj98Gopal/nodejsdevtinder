@@ -13,6 +13,7 @@ exports.validateUserProfileUpdate = [
     .optional()
     .isMobilePhone()
     .withMessage("Invalid phone number"),
+  body("experience").optional().notEmpty().withMessage("Invalid experience"),
   body("gender")
     .optional()
     .notEmpty()
