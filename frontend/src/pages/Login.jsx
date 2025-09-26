@@ -15,10 +15,12 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "@/utils/http";
 import { toast } from "sonner";
+import { useDispatch } from "react-redux";
+import { updateUserData } from "@/app/userSlice";
 
 const Login = () => {
   const navigate = useNavigate();
-  // const { login, register } = useAuth();
+  const dispatch = useDispatch()
 
   // Login form state
   const [loginForm, setLoginForm] = useState({
@@ -46,7 +48,7 @@ const Login = () => {
 
       if (response.data.success) {
         toast.success("Welcome back!");
-        console.log("user data :", response.data.data);
+        dispatch(updateUserData(response.data.data))
         navigate("/");
       } else {
         toast.error("Invalid credentials");

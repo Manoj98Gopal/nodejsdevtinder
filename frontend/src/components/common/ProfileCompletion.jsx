@@ -5,15 +5,15 @@ import { Progress } from "../ui/progress";
 const ProfileCompletion = ({ user }) => {
   const calculateCompletion = () => {
     const fields = [
-      user.firstName,
-      user.lastName,
-      user.email,
-      user.phoneNumber,
-      user.experience,
-      user.gender,
-      user.profileURL,
-      user.about,
-      user.skills.length > 0 ? "skills" : ""
+      user?.firstName,
+      user?.lastName,
+      user?.email,
+      user?.phoneNumber,
+      user?.experience,
+      user?.gender,
+      user?.profileURL,
+      user?.about,
+      user?.skills.length > 0 ? "skills" : ""
     ];
 
     const filledFields = fields.filter((field) => field && field.trim()).length;

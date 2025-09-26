@@ -1,0 +1,22 @@
+export const SKILLS = [
+  { id: 1, name: "JavaScript" },
+  { id: 2, name: "React.js" },
+  { id: 3, name: "Next.js" },
+  { id: 4, name: "Node.js" },
+  { id: 5, name: "Express.js" },
+  { id: 6, name: "MongoDB" },
+  { id: 7, name: "HTML" },
+  { id: 8, name: "CSS" },
+  { id: 9, name: "Docker" },
+  { id: 10, name: "Git & GitHub" },
+  { id: 11, name: "REST API" },
+  { id: 12, name: "JWT Authentication" },
+  { id: 13, name: "ShadCN UI" },
+  { id: 14, name: "Framer Motion" },
+  { id: 15, name: "Figma" },
+  { id: 16, name: "Python (Basics)" },
+  { id: 17, name: "Django (Basics)" },
+  { id: 18, name: "Data Structures & Algorithms" },
+  { id: 19, name: "English Communication" },
+  { id: 20, name: "Project Deployment" }
+];

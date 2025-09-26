@@ -1,3 +1,4 @@
+import { updateUserData } from "@/app/userSlice";
 import ProfileCompletion from "@/components/common/ProfileCompletion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,33 +20,25 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Lock, Settings, User } from "lucide-react";
-import React, { useState } from "react";
-
-const user = {
-  firstName: "Manoj",
-  lastName: "Gopal",
-  profileURL: "https://randomuser.me/api/portraits/men/32.jpg",
-  email: "manoj.gopal@example.com",
-  phoneNumber: "+91 98765 43210",
-  gender: "male",
-  experience: "5+ years",
-  skills: ["React.js", "Next.js", "JavaScript", "Django", "Docker"]
-};
+import { SKILLS } from "@/constant/appConstant";
+import api from "@/utils/http";
+import { Lock, Settings, User, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [profileForm, setProfileForm] = useState({
-    firstName: user?.firstName || "",
-    lastName: user?.lastName || "",
-    email: user?.email || "",
-    phoneNumber: user?.phoneNumber || "",
-    experience: user?.experience || "",
-    gender: user?.gender || "",
-    profileURL: user?.profileURL || "",
-    about: user?.about || "",
-    skills: user?.skills || []
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
+    experience: "",
+    gender: "",
+    profileURL: "",
+    about: "",
+    skills: []
   });
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -53,77 +46,80 @@ const Profile = () => {
     confirmPassword: ""
   });
 
-  const [skillInput, setSkillInput] = useState("");
+  const dispatch = useDispatch()
+
+  const userData = useSelector((store) => store.userData);
+
+  const updateLocalStateOfProfile = (data) => {
+    const tempData = {
+      firstName: data?.firstName || "",
+      lastName: data?.lastName || "",
+      phoneNumber: data?.phoneNumber || "",
+      experience: data?.experience || "",
+      gender: data?.gender || "",
+      profileURL: data?.profileURL || "",
+      about: data?.about || "",
+      skills: data?.skills || []
+    };
+    setProfileForm(tempData);
+  };
+
+  useEffect(() => {
+    updateLocalStateOfProfile(userData);
+  }, [userData]);
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
-    // setIsLoading(true)
-
-    // try {
-    //   const success = await updateProfile(profileForm)
-    //   if (success) {
-    //     toast.success("Profile updated successfully!")
-    //     setIsEditing(false)
-    //   } else {
-    //     toast.error("Failed to update profile")
-    //   }
-    // } catch (error) {
-    //   toast.error("Failed to update profile")
-    // } finally {
-    //   setIsLoading(false)
-    // }
+    setIsLoading(true);
+    try {
+      const success = await api.patch("/profile/edit", profileForm);
+      if (success?.data?.success) {
+        toast.success("Profile updated successfully!");
+        dispatch(updateUserData(success?.data?.data))
+        setIsEditing(false);
+      } else {
+        toast.error("Failed to update profile");
+      }
+    } catch (error) {
+      toast.error("Failed to update profile");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
 
-    // if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-    //   toast.error("Passwords don't match")
-    //   return
-    // }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("Passwords don't match")
+      return
+    }
 
-    // setIsLoading(true)
+    setIsLoading(true)
 
-    // try {
-    //   const success = await updatePassword(passwordForm.currentPassword, passwordForm.newPassword)
-    //   if (success) {
-    //     toast.success("Password updated successfully!")
-    //     setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" })
-    //   } else {
-    //     toast.error("Failed to update password")
-    //   }
-    // } catch (error) {
-    //   toast.error("Failed to update password")
-    // } finally {
-    //   setIsLoading(false)
-    // }
+    try {
+
+      const payload = {
+        oldPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      }
+
+      const response = await api.patch("/profile/password/",payload)
+
+      if (response?.data?.success) {
+        toast.success("Password updated successfully!")
+        setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" })
+      } else {
+        toast.error("Failed to update password")
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message)
+    } finally {
+      setIsLoading(false)
+    }
   };
 
-  const addSkill = () => {
-    // if (skillInput.trim() && !profileForm.skills.includes(skillInput.trim())) {
-    //   setProfileForm(prev => ({
-    //     ...prev,
-    //     skills: [...prev.skills, skillInput.trim()]
-    //   }))
-    //   setSkillInput("")
-    // }
-  };
-
-  const removeSkill = (skillToRemove) => {
-    // setProfileForm(prev => ({
-    //   ...prev,
-    //   skills: prev.skills.filter(skill => skill !== skillToRemove)
-    // }))
-  };
-
-  const handleSkillKeyPress = (e) => {
-    // if (e.key === "Enter") {
-    //   e.preventDefault()
-    //   addSkill()
-    // }
-  };
-
-  if (!user) return null;
+  if (!userData) return null;
 
   return (
     <div className="container mx-auto p-6">
@@ -150,15 +146,15 @@ const Profile = () => {
           <div className="lg:col-span-1">
             <Card className="dev-card">
               <CardContent className="p-6 text-center">
-                <ProfileCompletion user={user} />
+                <ProfileCompletion user={userData} />
                 <div className="border-t my-6"></div>
                 <div className="relative inline-block mb-4">
                   <img
                     src={
-                      user.profileURL ||
+                      userData?.profileURL ||
                       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d"
                     }
-                    alt={`${user.firstName} ${user.lastName}`}
+                    alt={`${userData?.firstName} ${userData?.lastName}`}
                     className="w-32 h-32 rounded-full object-cover border-4 border-primary/20"
                   />
                   <div className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center">
@@ -167,32 +163,38 @@ const Profile = () => {
                 </div>
 
                 <h3 className="text-xl font-bold mb-1">
-                  {user.firstName} {user.lastName}
+                  {userData?.firstName} {userData?.lastName}
                 </h3>
-                <p className="text-muted-foreground mb-4">{user.experience}</p>
+                <p className="text-muted-foreground mb-4">
+                  {userData?.experience} years
+                </p>
 
                 <div className="space-y-3 text-sm">
                   <div className="flex gap-2">
                     <span className="text-muted-foreground">Email:</span>
-                    <span className="font-medium">{user.email}</span>
+                    <span className="font-medium">{userData?.email}</span>
                   </div>
-                  <div className="flex gap-2">
-                    <span className="text-muted-foreground">Phone:</span>
-                    <span className="font-medium">{user.phoneNumber}</span>
-                  </div>
+                  {userData?.phoneNumber && (
+                    <div className="flex gap-2">
+                      <span className="text-muted-foreground">Phone:</span>
+                      <span className="font-medium">
+                        {userData?.phoneNumber}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex gap-2">
                     <span className="text-muted-foreground">Gender:</span>
                     <span className="font-medium capitalize">
-                      {user.gender}
+                      {userData?.gender}
                     </span>
                   </div>
                 </div>
 
-                {user.skills.length > 0 && (
+                {userData?.skills.length > 0 && (
                   <div className="mt-6">
                     <h4 className="font-medium mb-3 text-left">Skills</h4>
                     <div className="flex flex-wrap gap-1">
-                      {user.skills.map((skill) => (
+                      {userData?.skills.map((skill) => (
                         <Badge
                           key={skill}
                           variant="secondary"
@@ -259,7 +261,7 @@ const Profile = () => {
                         </div>
                       </div>
 
-                      <div className="space-y-2">
+                      {/* <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
                         <Input
                           id="email"
@@ -274,7 +276,7 @@ const Profile = () => {
                           disabled={!isEditing}
                           required
                         />
-                      </div>
+                      </div> */}
 
                       <div className="space-y-2">
                         <Label htmlFor="phoneNumber">Phone Number</Label>
@@ -295,35 +297,19 @@ const Profile = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="experience">Experience</Label>
-                          <Select
+
+                          <Input
+                            id="experience"
                             value={profileForm.experience}
-                            onValueChange={(value) =>
+                            onChange={(e) => {
                               setProfileForm((prev) => ({
                                 ...prev,
-                                experience: value
-                              }))
-                            }
+                                experience: e.target.value
+                              }));
+                            }}
                             disabled={!isEditing}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="0-1 years">
-                                0-1 years
-                              </SelectItem>
-                              <SelectItem value="1-3 years">
-                                1-3 years
-                              </SelectItem>
-                              <SelectItem value="3-5 years">
-                                3-5 years
-                              </SelectItem>
-                              <SelectItem value="5+ years">5+ years</SelectItem>
-                              <SelectItem value="10+ years">
-                                10+ years
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                            required
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="gender">Gender</Label>
@@ -386,30 +372,57 @@ const Profile = () => {
                       {isEditing && (
                         <div className="space-y-2">
                           <Label htmlFor="skills">Skills</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              id="skills"
-                              placeholder="Add a skill..."
-                              value={skillInput}
-                              onChange={(e) => setSkillInput(e.target.value)}
-                              onKeyPress={handleSkillKeyPress}
-                            />
-                            <Button type="button" onClick={addSkill} size="sm">
-                              Add
-                            </Button>
-                          </div>
+                          <Select
+                            className="w-full"
+                            onValueChange={(value) => {
+                              const selectedSkill = SKILLS.find(
+                                (s) => s.id === Number(value)
+                              );
+                              if (
+                                selectedSkill &&
+                                !profileForm.skills.includes(selectedSkill.name)
+                              ) {
+                                setProfileForm((prev) => ({
+                                  ...prev,
+                                  skills: [...prev.skills, selectedSkill.name] // store only string
+                                }));
+                              }
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a skill" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {SKILLS.map((skill) => (
+                                <SelectItem
+                                  key={skill.id}
+                                  value={skill.id.toString()}
+                                >
+                                  {skill.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+
                           {profileForm.skills.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-2">
-                              {profileForm.skills.map((skill) => (
+                              {profileForm.skills.map((skill, index) => (
                                 <Badge
-                                  key={skill}
+                                  key={index}
                                   variant="secondary"
                                   className="skill-tag"
                                 >
                                   {skill}
                                   <button
                                     type="button"
-                                    onClick={() => removeSkill(skill)}
+                                    onClick={() =>
+                                      setProfileForm((prev) => ({
+                                        ...prev,
+                                        skills: prev.skills.filter(
+                                          (s) => s !== skill
+                                        )
+                                      }))
+                                    }
                                     className="ml-1 hover:text-destructive"
                                   >
                                     <X className="h-3 w-3" />
