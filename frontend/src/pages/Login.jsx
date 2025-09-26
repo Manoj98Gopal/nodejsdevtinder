@@ -17,10 +17,17 @@ import api from "@/utils/http";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { updateUserData } from "@/app/userSlice";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 
 const Login = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   // Login form state
   const [loginForm, setLoginForm] = useState({
@@ -35,7 +42,8 @@ const Login = () => {
     email: "",
     phoneNumber: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    gender: "male"
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -48,7 +56,7 @@ const Login = () => {
 
       if (response.data.success) {
         toast.success("Welcome back!");
-        dispatch(updateUserData(response.data.data))
+        dispatch(updateUserData(response.data.data));
         navigate("/");
       } else {
         toast.error("Invalid credentials");
@@ -71,21 +79,21 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const success = await register({
+      const payload = {
         firstName: registerForm.firstName,
         lastName: registerForm.lastName,
         email: registerForm.email,
         phoneNumber: registerForm.phoneNumber,
         password: registerForm.password,
-        experience: "",
-        gender: "",
-        profileURL: "",
-        about: "",
-        skills: []
-      });
-      if (success) {
+        gender: registerForm.gender
+      };
+      const response = await api.post("/signup", payload);
+
+      if (response?.data?.success) {
         toast.success("Account created successfully!");
-        navigate("/feed");
+        dispatch(updateUserData(response.data.data));
+
+        navigate("/");
       } else {
         toast.error("Registration failed");
       }
@@ -230,6 +238,30 @@ const Login = () => {
                       }
                       required
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="gender">Gender</Label>
+                    <Select
+                      value={registerForm.gender}
+                      onValueChange={(value) =>
+                        setRegisterForm((prev) => ({
+                          ...prev,
+                          gender: value
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="prefer-not-to-say">
+                          Prefer not to say
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">

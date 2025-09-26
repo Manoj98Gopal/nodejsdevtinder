@@ -26,6 +26,16 @@ AuthRouter.post(
       const userObj = user.toObject();
       delete userObj.password;
 
+      // creating jwt token and adding user id to that jwt
+      const jwtToken = jwt.sign({ id: userObj._id }, "devTinder", {
+        expiresIn: "1d"
+      });
+
+      // setting the  jwt token in resCookie
+      res.cookie("token", jwtToken, {
+        httpOnly: false
+      });
+
       res.status(201).json({ success: true, data: userObj });
     } catch (error) {
       res.status(400).json({ success: false, message: error.message });
