@@ -5,7 +5,18 @@ const User = require("../models/user");
 
 const UserRouter = express.Router();
 
-const USER_SAFE_DATA = "firstName lastName gender";
+const USER_SAFE_DATA =
+  "firstName lastName gender experience profileURL about skills updatedAt";
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    // Pick a random index from 0 to i
+    const j = Math.floor(Math.random() * (i + 1));
+    // Swap arr[i] with arr[j]
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 UserRouter.get("/user/requests", userMiddleware, async (req, res) => {
   try {
@@ -13,6 +24,19 @@ UserRouter.get("/user/requests", userMiddleware, async (req, res) => {
       receiver: req.user._id,
       status: "interested"
     }).populate("sender", USER_SAFE_DATA);
+
+    res.status(200).json({ message: "Success fully fetched", data: requests });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+UserRouter.get("/user/outgoing_request", userMiddleware, async (req, res) => {
+  try {
+    const requests = await ConnectionRequest.find({
+      sender: req.user._id,
+      status: "interested"
+    }).populate("receiver", USER_SAFE_DATA);
 
     res.status(200).json({ message: "Success fully fetched", data: requests });
   } catch (error) {
@@ -40,7 +64,7 @@ UserRouter.get("/user/connections", userMiddleware, async (req, res) => {
       return request.sender;
     });
 
-    res.status(200).json({ message: "Success fully fetched", data });
+    res.status(200).json({ message: "Success fully fetched", data, success: true });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
@@ -51,9 +75,8 @@ UserRouter.get("/user/feed", userMiddleware, async (req, res) => {
     const loggedInUser = req.user;
 
     const pageNumber = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 0
-    const skipNum = (pageNumber - 1) * limit 
-
+    const limit = parseInt(req.query.limit) || 0;
+    const skipNum = (pageNumber - 1) * limit;
 
     const myConnections = await ConnectionRequest.find({
       $or: [{ sender: loggedInUser._id }, { receiver: loggedInUser._id }]
@@ -72,9 +95,16 @@ UserRouter.get("/user/feed", userMiddleware, async (req, res) => {
 
     const feed = await User.find({
       _id: { $nin: hiddenUsers }
-    }).select("_id firstName lastName email gender profileURL skills").skip(skipNum).limit(limit)
+    })
+      .select("_id firstName lastName email gender profileURL skills")
+      .skip(skipNum)
+      .limit(limit);
 
-    res.status(200).json({ message: "successful fetched!", data: feed });
+    const randomizedArray = shuffleArray(feed);
+
+    res
+      .status(200)
+      .json({ message: "successful fetched!", data: randomizedArray });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }

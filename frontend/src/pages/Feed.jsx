@@ -2,72 +2,19 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, X, MapPin, Calendar, Briefcase } from "lucide-react";
-const mockDevelopers = [
-  {
-    id: "2",
-    firstName: "Alex",
-    lastName: "Chen",
-    age: 32,
-    experience: "8+ years",
-    location: "New York, NY",
-    profileURL: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
-    about:
-      "Senior Software Engineer specializing in microservices architecture. Always learning new technologies and contributing to open source.",
-    skills: ["Java", "Spring Boot", "Kubernetes", "Docker", "MongoDB"],
-    company: "Microsoft"
-  },
-  {
-    id: "1",
-    firstName: "Sarah",
-    lastName: "Johnson",
-    age: 28,
-    experience: "5+ years",
-    location: "San Francisco, CA",
-    profileURL: "https://images.unsplash.com/photo-1494790108755-2616b612b786",
-    about:
-      "Full-stack developer passionate about React and Node.js. Love building scalable applications and mentoring junior developers.",
-    skills: ["React", "Node.js", "TypeScript", "PostgreSQL", "AWS"],
-    company: "Google"
-  },
-
-  {
-    id: "3",
-    firstName: "Maya",
-    lastName: "Patel",
-    age: 26,
-    experience: "3+ years",
-    location: "Austin, TX",
-    profileURL: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
-    about:
-      "Frontend developer with a passion for creating beautiful, accessible user interfaces. UX enthusiast and design systems advocate.",
-    skills: ["React", "Vue.js", "CSS", "Figma", "Accessibility"],
-    company: "Airbnb"
-  },
-  {
-    id: "4",
-    firstName: "David",
-    lastName: "Kim",
-    age: 30,
-    experience: "6+ years",
-    location: "Seattle, WA",
-    profileURL: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
-    about:
-      "DevOps engineer focused on cloud infrastructure and automation. Love optimizing deployment pipelines and system reliability.",
-    skills: ["AWS", "Terraform", "Python", "Jenkins", "Monitoring"],
-    company: "Amazon"
-  }
-];
+import { Heart, X, Calendar, Mail } from "lucide-react";
+import api from "@/utils/http";
+import { toast } from "sonner"; // ✅ assuming you're using sonner/toast
 
 const Feed = () => {
-  const [developers, setDevelopers] = useState(mockDevelopers);
+  const [developers, setDevelopers] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
   const currentDeveloper = developers[currentIndex];
 
-  const handleAction = (action) => {
-    if (isAnimating) return;
+  const handleAction = async (action) => {
+    if (isAnimating || !currentDeveloper) return;
 
     setIsAnimating(true);
 
@@ -78,24 +25,31 @@ const Feed = () => {
       );
     }
 
-    setTimeout(() => {
+    try {
       if (action === "like") {
+        await api.post(`/request/send/interested/${currentDeveloper._id}`);
         toast.success(`Sent interest to ${currentDeveloper.firstName}!`, {
-          icon: "❤️"
+          icon: "❤️",
         });
       } else {
+        await api.post(`/request/send/ignored/${currentDeveloper._id}`);
         toast(`${currentDeveloper.firstName} skipped`, {
-          icon: "👋"
+          icon: "👋",
         });
       }
+    } catch (error) {
+      console.error("Action failed:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setTimeout(() => {
+        setCurrentIndex((prev) => prev + 1);
+        setIsAnimating(false);
 
-      setCurrentIndex((prev) => prev + 1);
-      setIsAnimating(false);
-
-      if (card) {
-        card.classList.remove("animate-swipe-right", "animate-swipe-left");
-      }
-    }, 400);
+        if (card) {
+          card.classList.remove("animate-swipe-right", "animate-swipe-left");
+        }
+      }, 400);
+    }
   };
 
   useEffect(() => {
@@ -107,6 +61,19 @@ const Feed = () => {
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [currentIndex, isAnimating]);
+
+  const getDeveloperList = async () => {
+    try {
+      const response = await api.get("/user/feed");
+      setDevelopers(response.data.data);
+    } catch (error) {
+      console.error("unable to get developers", error);
+    }
+  };
+
+  useEffect(() => {
+    getDeveloperList();
+  }, []);
 
   if (currentIndex >= developers.length) {
     return (
@@ -129,6 +96,7 @@ const Feed = () => {
       </div>
     );
   }
+
   return (
     <div className="container mx-auto">
       <div className="max-w-md mx-auto mt-6">
@@ -149,47 +117,45 @@ const Feed = () => {
                 <h3 className="text-2xl font-bold">
                   {currentDeveloper.firstName} {currentDeveloper.lastName}
                 </h3>
-                <p className="text-sm opacity-90">
-                  {currentDeveloper.age} years old
-                </p>
               </div>
             </div>
 
             <CardContent className="p-6">
               <div className="space-y-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  <span>{currentDeveloper.location}</span>
-                </div>
+                {currentDeveloper.experience && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    <span>{currentDeveloper.experience} experience</span>
+                  </div>
+                )}
 
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Briefcase className="h-4 w-4" />
-                  <span>{currentDeveloper.company}</span>
-                </div>
-
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  <span>{currentDeveloper.experience} experience</span>
-                </div>
+                {currentDeveloper.email && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Mail className="h-4 w-4" />
+                    <span>{currentDeveloper.email}</span>
+                  </div>
+                )}
 
                 <p className="text-sm leading-relaxed">
                   {currentDeveloper.about}
                 </p>
 
-                <div>
-                  <h4 className="font-medium mb-2">Skills</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {currentDeveloper.skills.map((skill) => (
-                      <Badge
-                        key={skill}
-                        variant="secondary"
-                        className="skill-tag text-xs"
-                      >
-                        {skill}
-                      </Badge>
-                    ))}
+                {currentDeveloper?.skills?.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2">Skills</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {currentDeveloper.skills.map((skill) => (
+                        <Badge
+                          key={skill}
+                          variant="secondary"
+                          className="skill-tag text-xs"
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>

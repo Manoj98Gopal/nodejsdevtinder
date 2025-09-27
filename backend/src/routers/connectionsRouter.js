@@ -100,7 +100,8 @@ ConnectionRouter.post(
 
       res.status(200).json({
         message: `connection request ${status}`,
-        data: connectionRequestData
+        data: connectionRequestData,
+        success: true
       });
     } catch (error) {
       res.status(500).json({ message: "Server error", error: error.message });

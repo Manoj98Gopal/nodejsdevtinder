@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   MessageCircle,
   Mail,
@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import api from "@/utils/http";
 
 const mockConnections = [
   {
@@ -79,13 +80,30 @@ const Connections = () => {
   const [experienceFilter, setExperienceFilter] = useState("all");
   const [skillFilter, setSkillFilter] = useState("all");
 
+  const [myConnections, setMyConnections] = useState([]);
+
+  const getMyConnections = async () => {
+    try {
+      const response = await api.get("/user/connections");
+      if(response.data.success){
+        setMyConnections(response.data.data)
+      }
+    } catch (error) {
+      console.log("unable to get my connections :", error);
+    }
+  };
+
+  useEffect(() => {
+    getMyConnections();
+  }, []);
+
   // Get all unique skills from connections
   const allSkills = Array.from(
     new Set(connections.flatMap((conn) => conn.skills))
   ).sort();
 
   // Filter connections based on search and filters
-  const filteredConnections = connections.filter((connection) => {
+  const filteredConnections = myConnections.filter((connection) => {
     const matchesSearch =
       searchQuery === "" ||
       `${connection.firstName} ${connection.lastName}`
@@ -196,19 +214,10 @@ const Connections = () => {
                           <h3 className="font-semibold text-lg truncate">
                             {connection.firstName} {connection.lastName}
                           </h3>
+                          
                           <p className="text-sm text-muted-foreground">
-                            {connection.company}
+                            {connection.experience} Years
                           </p>
-                          <p className="text-sm text-muted-foreground">
-                            {connection.experience}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 space-y-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          <span>{connection.location}</span>
                         </div>
                       </div>
 
@@ -250,7 +259,7 @@ const Connections = () => {
 
                       <div className="mt-3 text-xs text-muted-foreground">
                         Connected on{" "}
-                        {new Date(connection.connectedAt).toLocaleDateString()}
+                        {new Date(connection.updatedAt).toLocaleDateString()}
                       </div>
                     </CardContent>
                   </Card>
@@ -296,9 +305,7 @@ const Connections = () => {
                           <h3 className="font-semibold text-lg truncate">
                             {connection.firstName} {connection.lastName}
                           </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {connection.company}
-                          </p>
+                         
                           <div className="connection-badge mt-1">
                             New Connection
                           </div>

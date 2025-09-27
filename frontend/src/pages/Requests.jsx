@@ -2,101 +2,63 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, X, Heart, MessageCircle, Clock } from "lucide-react"
-import React, { useState } from "react";
+import api from "@/utils/http";
+import { Check, X, Heart, MessageCircle, Clock } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 
-const mockRequests = [
-  {
-    id: "1",
-    firstName: "Emma",
-    lastName: "Wilson",
-    experience: "4+ years",
-    location: "Los Angeles, CA",
-    profileURL: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f",
-    about:
-      "Mobile app developer specializing in React Native and Flutter. Passionate about creating seamless user experiences.",
-    skills: ["React Native", "Flutter", "JavaScript", "Firebase", "UI/UX"],
-    company: "Spotify",
-    requestedAt: "2024-01-25",
-    status: "pending",
-    type: "incoming"
-  },
-  {
-    id: "2",
-    firstName: "James",
-    lastName: "Rodriguez",
-    experience: "6+ years",
-    location: "Chicago, IL",
-    profileURL: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
-    about:
-      "Backend engineer with expertise in distributed systems and microservices architecture.",
-    skills: ["Python", "Django", "PostgreSQL", "Redis", "Docker"],
-    company: "Uber",
-    requestedAt: "2024-01-23",
-    status: "pending",
-    type: "incoming"
-  },
-  {
-    id: "3",
-    firstName: "Lisa",
-    lastName: "Chang",
-    experience: "3+ years",
-    location: "Boston, MA",
-    profileURL: "https://images.unsplash.com/photo-1494790108755-2616b612b786",
-    about:
-      "Data scientist with a focus on machine learning and predictive analytics.",
-    skills: ["Python", "TensorFlow", "Pandas", "SQL", "R"],
-    company: "Netflix",
-    requestedAt: "2024-01-20",
-    status: "pending",
-    type: "outgoing"
-  },
-  {
-    id: "4",
-    firstName: "Michael",
-    lastName: "Brown",
-    experience: "7+ years",
-    location: "Portland, OR",
-    profileURL: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
-    about:
-      "Full-stack developer and tech lead with experience in scaling applications.",
-    skills: ["React", "Node.js", "AWS", "GraphQL", "TypeScript"],
-    company: "Slack",
-    requestedAt: "2024-01-18",
-    status: "pending",
-    type: "outgoing"
-  }
-];
+
 
 const Requests = () => {
-  const [requests, setRequests] = useState(mockRequests);
+  const [requests, setRequests] = useState([]);
+  const [myRequest, setMyRequest] = useState([]);
+  const [outGoingRequest, setGoingRequest] = useState([]);
 
-  const handleRequest = (requestId, action) => {
-    // setRequests(prev => prev.map(request =>
-    //   request.id === requestId
-    //     ? { ...request, status: action === "accept" ? "accepted" : "rejected" }
-    //     : request
-    // ))
-    // const request = requests.find(r => r.id === requestId)
-    // if (request) {
-    //   if (action === "accept") {
-    //     toast.success(`You're now connected with ${request.firstName}!`, {
-    //       icon: "🎉"
-    //     })
-    //   } else {
-    //     toast(`Request from ${request.firstName} declined`, {
-    //       icon: "👋"
-    //     })
-    //   }
-    // }
+  const handleRequest = async (requestId, action, name) => {
+    const filteredRequest = myRequest?.filter((data) => data._id != requestId);
+
+    const request = await api.post(`/request/review/${action}/${requestId}`);
+
+    console.log("reqered data :", request.data);
+
+    if (request?.data?.success) {
+      if (action === "accepted") {
+        toast.success(`You're now connected with ${name}!`, {
+          icon: "🎉"
+        });
+      } else {
+        toast.info(`Request from ${name} declined`, {
+          icon: "👋"
+        });
+      }
+    }
+
+    setMyRequest(filteredRequest);
   };
 
-  const incomingRequests = requests.filter(
-    (r) => r.type === "incoming" && r.status === "pending"
-  );
-  const outgoingRequests = requests.filter(
-    (r) => r.type === "outgoing" && r.status === "pending"
-  );
+  const getMyRequests = async () => {
+    try {
+      const response = await api.get("/user/requests");
+      setMyRequest(response.data?.data);
+    } catch (error) {
+      console.error("unable to get errors :", error);
+    }
+  };
+
+  const getOutGoingRequest = async () => {
+    try {
+      const response = await api.get("/user/outgoing_request");
+      setGoingRequest(response.data?.data);
+    } catch (error) {
+      console.error("unable to get errors :", error);
+    }
+  };
+
+  useEffect(() => {
+    getMyRequests();
+    getOutGoingRequest();
+  }, []);
+
   const processedRequests = requests.filter((r) => r.status !== "pending");
 
   return (
@@ -112,11 +74,11 @@ const Requests = () => {
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-primary"></div>
-              <span>{incomingRequests.length} Incoming</span>
+              <span>{myRequest.length} Incoming</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-muted-foreground"></div>
-              <span>{outgoingRequests.length} Outgoing</span>
+              <span>{outGoingRequest.length} Outgoing</span>
             </div>
           </div>
         </div>
@@ -125,9 +87,9 @@ const Requests = () => {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="incoming" className="relative">
               Incoming
-              {incomingRequests.length > 0 && (
+              {myRequest.length > 0 && (
                 <Badge className="ml-2 h-5 w-5 rounded-full p-0 text-xs">
-                  {incomingRequests.length}
+                  {myRequest.length}
                 </Badge>
               )}
             </TabsTrigger>
@@ -136,48 +98,42 @@ const Requests = () => {
           </TabsList>
 
           <TabsContent value="incoming" className="space-y-6">
-            {incomingRequests.length > 0 ? (
+            {myRequest.length > 0 ? (
               <div className="space-y-4">
-                {incomingRequests.map((request) => (
-                  <Card key={request.id} className="dev-card">
+                {myRequest.map((request) => (
+                  <Card key={request._id} className="dev-card">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
                         <img
-                          src={request.profileURL}
-                          alt={`${request.firstName} ${request.lastName}`}
+                          src={request.sender.profileURL}
+                          alt={`${request.sender.firstName} ${request.sender.lastName}`}
                           className="w-20 h-20 rounded-full object-cover border-2 border-primary/20"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between">
                             <div>
                               <h3 className="text-xl font-semibold">
-                                {request.firstName} {request.lastName}
+                                {request.sender.firstName}{" "}
+                                {request.sender.lastName}
                               </h3>
-                              <p className="text-muted-foreground">
-                                {request.company}
-                              </p>
+
                               <p className="text-sm text-muted-foreground">
-                                {request.experience}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                {request.location}
+                                {request.sender.experience} Years
                               </p>
                             </div>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <Clock className="h-3 w-3" />
-                              {new Date(
-                                request.requestedAt
-                              ).toLocaleDateString()}
+                              {new Date(request.createdAt).toLocaleDateString()}
                             </div>
                           </div>
 
                           <p className="mt-3 text-sm leading-relaxed line-clamp-2">
-                            {request.about}
+                            {request.sender.about}
                           </p>
 
                           <div className="mt-4">
                             <div className="flex flex-wrap gap-1">
-                              {request.skills.map((skill) => (
+                              {request.sender.skills.map((skill) => (
                                 <Badge
                                   key={skill}
                                   variant="secondary"
@@ -192,7 +148,11 @@ const Requests = () => {
                           <div className="mt-6 flex gap-3">
                             <Button
                               onClick={() =>
-                                handleRequest(request.id, "accept")
+                                handleRequest(
+                                  request._id,
+                                  "accepted",
+                                  request.sender.firstName
+                                )
                               }
                               className="glow-button flex-1"
                             >
@@ -202,7 +162,11 @@ const Requests = () => {
                             <Button
                               variant="outline"
                               onClick={() =>
-                                handleRequest(request.id, "reject")
+                                handleRequest(
+                                  request._id,
+                                  "rejected",
+                                  request.sender.firstName
+                                )
                               }
                               className="flex-1 border-destructive text-destructive hover:bg-destructive hover:text-white"
                             >
@@ -230,28 +194,27 @@ const Requests = () => {
           </TabsContent>
 
           <TabsContent value="outgoing" className="space-y-6">
-            {outgoingRequests.length > 0 ? (
+            {outGoingRequest.length > 0 ? (
               <div className="space-y-4">
-                {outgoingRequests.map((request) => (
-                  <Card key={request.id} className="dev-card">
+                {outGoingRequest.map((request) => (
+                  <Card key={request._id} className="dev-card">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
                         <img
-                          src={request.profileURL}
-                          alt={`${request.firstName} ${request.lastName}`}
+                          src={request.receiver.profileURL}
+                          alt={`${request.receiver.firstName} ${request.receiver.lastName}`}
                           className="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between">
                             <div>
                               <h3 className="text-lg font-semibold">
-                                {request.firstName} {request.lastName}
+                                {request.receiver.firstName}{" "}
+                                {request.receiver.lastName}
                               </h3>
-                              <p className="text-muted-foreground">
-                                {request.company}
-                              </p>
+
                               <p className="text-sm text-muted-foreground">
-                                {request.experience}
+                                {request.receiver.experience} Years
                               </p>
                             </div>
                             <div className="flex items-center gap-2">
@@ -266,23 +229,25 @@ const Requests = () => {
                           </div>
 
                           <p className="mt-2 text-sm leading-relaxed line-clamp-1">
-                            {request.about}
+                            {request.receiver.about}
                           </p>
 
                           <div className="mt-3">
                             <div className="flex flex-wrap gap-1">
-                              {request.skills.slice(0, 4).map((skill) => (
-                                <Badge
-                                  key={skill}
-                                  variant="secondary"
-                                  className="skill-tag text-xs"
-                                >
-                                  {skill}
-                                </Badge>
-                              ))}
-                              {request.skills.length > 4 && (
+                              {request.receiver.skills
+                                .slice(0, 4)
+                                .map((skill) => (
+                                  <Badge
+                                    key={skill}
+                                    variant="secondary"
+                                    className="skill-tag text-xs"
+                                  >
+                                    {skill}
+                                  </Badge>
+                                ))}
+                              {request.receiver.skills.length > 4 && (
                                 <Badge variant="outline" className="text-xs">
-                                  +{request.skills.length - 4}
+                                  +{request.receiver.skills.length - 4}
                                 </Badge>
                               )}
                             </div>
@@ -290,7 +255,7 @@ const Requests = () => {
 
                           <div className="mt-4 text-xs text-muted-foreground">
                             Sent on{" "}
-                            {new Date(request.requestedAt).toLocaleDateString()}
+                            {new Date(request.createdAt).toLocaleDateString()}
                           </div>
                         </div>
                       </div>
