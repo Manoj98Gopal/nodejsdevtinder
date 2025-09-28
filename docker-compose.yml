@@ -4,6 +4,22 @@
 version: '3.8'
 
 services:
+  mongodb:
+    image: mongo:7-jammy
+    container_name: devtinder-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: devTinder
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - devtinder-network
+    restart: unless-stopped
+
   backend:
     build:
       context: ./backend
@@ -11,11 +27,14 @@ services:
     ports:
       - "7777:7777"
     environment:
-      - NODE_ENV=production
-      - MONGO_URI=mongodb+srv://manoj98achar:2VJBuTqAPsdTZS9t@cluster0.iyss4mk.mongodb.net/devTinder
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://admin:password123@mongodb:27017/devTinder?authSource=admin
+      - PORT=7777
     volumes:
       - ./backend:/app
       - /app/node_modules
+    depends_on:
+      - mongodb
     networks:
       - devtinder-network
     restart: unless-stopped
@@ -31,6 +50,12 @@ services:
     networks:
       - devtinder-network
     restart: unless-stopped
+
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
 
 networks:
   devtinder-network:

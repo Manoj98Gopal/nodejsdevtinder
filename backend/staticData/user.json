@@ -1,0 +1,129 @@
+[
+  {
+    "firstName": "Puneeth",
+    "lastName": "Rajkumar",
+    "email": "puneeth@gmail.com",
+    "phoneNumber": "9876543210",
+    "gender": "male",
+    "profileURL": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRwJPpBA5wKxe4oB…",
+    "skills": [
+      "Python (Basics)",
+      "Framer Motion",
+      "REST API",
+      "Docker",
+      "Express.js"
+    ],
+    "password": "$2b$10$kjv561QMD6AbO0s2s1KnreYid1RvmrRDLdFMR118Xwn/fp8dSYFE6",
+    "about": "Known as Appu, Power Star of Kannada cinema, loved for his humility an…",
+    "experience": "5"
+  },
+  {
+    "firstName": "Shiva",
+    "lastName": "Rajkumar",
+    "email": "shiva@gmail.com",
+    "phoneNumber": "9876543211",
+    "gender": "male",
+    "profileURL": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuz9xbVmoHby6PeK…",
+    "skills": [
+      "HTML",
+      "Express.js",
+      "Node.js",
+      "Data Structures & Algorithms",
+      "Next.js"
+    ],
+    "password": "$2b$10$4J6fPPXuVg6QKUGYa6PegOnAODknFyXlU9PBej2CLk4jA5UB1gCWy",
+    "about": "Hattrick Hero of Kannada cinema, known for versatile roles.",
+    "experience": "8"
+  },
+  {
+    "firstName": "Ramesh",
+    "lastName": "Aravind",
+    "email": "ramesh@gmail.com",
+    "phoneNumber": "9876543212",
+    "gender": "male",
+    "profileURL": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSP04Y5RWuISVCcWo…",
+    "skills": ["Figma", "HTML", "JavaScript", "Django (Basics)", "CSS"],
+    "password": "$2b$10$0LqusbIlWmV1bXC3gC8g1uurVJpJefJVLm79xNXJH14B1bwmRMy0m",
+    "about": "Actor, director, and TV host, admired for clean image and inspiring ta…",
+    "experience": "6"
+  },
+  {
+    "firstName": "Sudeep",
+    "lastName": "Kichcha",
+    "email": "sudeep@gmail.com",
+    "phoneNumber": "9876543213",
+    "gender": "male",
+    "profileURL": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcRyL6r1n0zKs1QeBK…",
+    "skills": ["Python (Basics)", "Docker", "MongoDB", "Framer Motion"],
+    "password": "$2b$10$BD8rTClkZnV6tpf6INPZNO/o0QhdXfuxnsJbJMnpES.W.p52RMCD.",
+    "about": "Kichcha Sudeep is known for intense performances and pan-Indian popula…",
+    "experience": "3"
+  },
+  {
+    "firstName": "Darshan",
+    "lastName": "Thoogudeepa",
+    "email": "darshan@gmail.com",
+    "phoneNumber": "9876543214",
+    "gender": "male",
+    "profileURL": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcTmEhYZYOiHwH2mAa…",
+    "skills": [
+      "Data Structures & Algorithms",
+      "JavaScript",
+      "React.js",
+      "Express.js",
+      "Node.js"
+    ],
+    "password": "$2b$10$tCTUp2uScsojJYXmV2T/meSoxUMm9B1G8/X1dNXN7aXzQV4I/8FtW",
+    "about": "Popularly called D-Boss, known for mass roles in Kannada industry.",
+    "experience": "6"
+  },
+  {
+    "firstName": "Yash",
+    "lastName": "kgf",
+    "email": "yash@gmail.com",
+    "phoneNumber": "9876543215",
+    "gender": "male",
+    "profileURL": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-xq-Mf5MDPN4poq…",
+    "skills": [
+      "JavaScript",
+      "MongoDB",
+      "Next.js",
+      "Django (Basics)",
+      "Docker",
+      "Express.js"
+    ],
+    "password": "$2b$10$kLFBEPcmHjxpT1HfVjyI1.k1sZqeou5dLFrGoCPR6lvVGxbC8Gwgi",
+    "about": "Rocking Star Yash, gained global fame with KGF series.",
+    "experience": "12"
+  },
+  {
+    "firstName": "Rukmini",
+    "lastName": "Vasanth",
+    "email": "rukmini@gmail.com",
+    "phoneNumber": "9876501234",
+    "gender": "female",
+    "profileURL": "https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSD7w8d42mTVmJUcf…",
+    "skills": ["Figma", "Git & GitHub", "Project Deployment", "MongoDB", "CSS"],
+    "password": "$2b$10$8byhiMHo1TNIxLPRRaP2WOBI2hgrxzECAXjnudKd8t52Zq4sgstsK",
+    "about": "Rukmini Vasanth is an Indian actress who works predominantly in Kannad…",
+    "experience": "5"
+  },
+  {
+    "firstName": "Ramya",
+    "lastName": "r",
+    "email": "ramya@gmail.com",
+    "phoneNumber": "9876534567",
+    "gender": "male",
+    "profileURL": "https://encrypted-tbn1.gstatic.com/licensed-image?q=tbn:ANd9GcRuT2ru4G…",
+    "skills": [
+      "JWT Authentication",
+      "Django (Basics)",
+      "Express.js",
+      "Git & GitHub",
+      "MongoDB"
+    ],
+    "password": "$2b$10$MlTPCFVHTpvaoaCdsJhxIerOLKVjSjkvDd12IV39qjNguvg7V5pKW",
+    "about": "Ramya is an Indian actress who appears in Kannada films. She is known …",
+    "experience": "8"
+  }
+]
